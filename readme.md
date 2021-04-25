@@ -1,13 +1,5 @@
-# Golang CleanArchitecture-like API server
+Implements of CleanArchitecture-like API server (for studying)
 
-# Frameworks
+## Language List
 
-- [Echo](https://echo.labstack.com/)
-- [ent](https://entgo.io/)
-- PostgreSQL
-
-## Run
-
-```
-docker-compose up
-```
+- Go
