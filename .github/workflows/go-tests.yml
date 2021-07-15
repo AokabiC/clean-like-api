@@ -1,0 +1,38 @@
+name: Go tests
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/go-tests.yml
+      - golang/**
+  pull_request:
+    paths:
+      - .github/workflows/go-tests.yml
+      - golang/**
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./golang
+    steps:
+      - uses: actions/checkout@v2
+      # https://github.com/actions/cache/blob/main/examples.md#go---modules
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      # https://github.com/marketplace/actions/run-golangci-lint
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.29
+          working-directory: golang
+      - name: Test
+        run: go test ./...
