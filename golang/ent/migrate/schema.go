@@ -11,7 +11,7 @@ var (
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString, Default: "unknown"},
+		{Name: "username", Type: field.TypeString, Unique: true, Size: 16},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
