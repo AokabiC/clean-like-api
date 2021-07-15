@@ -54,7 +54,7 @@ func (controller *UserController) GetByID(c echo.Context) (err error) {
 		Username: string(user.Username),
 	}
 
-	c.JSON(http.StatusOK, response)
+	_ = c.JSON(http.StatusOK, response)
 	return nil
 }
 
