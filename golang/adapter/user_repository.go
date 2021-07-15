@@ -13,28 +13,28 @@ type UserPgRepository struct {
 
 var _ domain.UserRepository = (*UserPgRepository)(nil)
 
-func (repo *UserPgRepository) GetByID(ctx context.Context, uid int) (*domain.User, error) {
-	userRecord, err := repo.client.User.Query().Where(entUser.IDEQ(uid)).Only(ctx)
+func (repo *UserPgRepository) GetByID(ctx context.Context, id domain.UserID) (*domain.User, error) {
+	userRecord, err := repo.client.User.Query().Where(entUser.IDEQ(int(id))).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	user, _ := domain.NewUser(
+		domain.UserID(userRecord.ID),
+		domain.Username(userRecord.Username),
+	)
+	return user, nil
+}
+
+func (repo *UserPgRepository) Create(ctx context.Context, userWithoutID domain.User) (*domain.User, error) {
+	userRecord, err := repo.client.User.
+		Create().
+		SetUsername(string(userWithoutID.Username)).
+		Save(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	user := &domain.User{
-		ID:   userRecord.ID,
-		Name: userRecord.Name,
-	}
+	user := &userWithoutID
+	user.ID = domain.UserID(userRecord.ID)
 	return user, nil
-}
-
-func (repo *UserPgRepository) Create(ctx context.Context, newUser *domain.User) error {
-	userRecord, err := repo.client.User.
-		Create().
-		SetName(newUser.Name).
-		Save(ctx)
-	if err != nil {
-		return err
-	}
-
-	newUser.ID = userRecord.ID
-	return nil
 }
