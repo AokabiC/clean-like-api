@@ -16,6 +16,9 @@ var _ domain.UserRepository = (*UserPgRepository)(nil)
 func (repo *UserPgRepository) GetByID(ctx context.Context, id domain.UserID) (*domain.User, error) {
 	userRecord, err := repo.client.User.Query().Where(entUser.IDEQ(int(id))).Only(ctx)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, domain.ErrUserNotFound
+		}
 		return nil, err
 	}
 	user, _ := domain.NewUser(

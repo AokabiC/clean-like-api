@@ -1,12 +1,14 @@
 package adapter
 
 import (
+	"go-clean/domain"
 	"go-clean/ent"
 	"go-clean/usecase"
 
 	"github.com/labstack/echo/v4"
 
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 )
@@ -34,12 +36,15 @@ type (
 )
 
 func (controller *UserController) GetByID(c echo.Context) (err error) {
-	id, _ := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
 	ctx := context.Background()
 	user, err := controller.Interactor.GetByID(ctx, id)
 	if err != nil {
-		if ent.IsNotFound(err) {
-			return echo.NewHTTPError(http.StatusNotFound)
+		if errors.Is(err, domain.ErrUserNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
 		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

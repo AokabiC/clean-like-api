@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"errors"
 )
 
 type UserRepository interface {
@@ -12,3 +13,5 @@ type UserRepository interface {
 	// Userを更新する。
 	Update(ctx context.Context, user User) (*User, error)
 }
+
+var ErrUserNotFound = errors.New("user not found")
