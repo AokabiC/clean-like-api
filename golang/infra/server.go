@@ -7,10 +7,12 @@ import (
 	"go-clean/ent/migrate"
 
 	"context"
+	"log"
 	"os"
 
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/go-playground/validator"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/lib/pq"
 )
 
@@ -23,24 +25,25 @@ func Run() {
 	defer dbClient.Close()
 
 	ctx := context.Background()
-	err = dbClient.Debug().Schema.Create(
+	if err = dbClient.Debug().Schema.Create(
 		ctx,
 		migrate.WithDropIndex(true),
 		migrate.WithDropColumn(true),
-	)
-	if err != nil {
-		fmt.Printf("failed creating schema resources. %s", err)
+	); err != nil {
+		log.Fatalf("failed creating schema resources. %s", err)
 	}
 
 	e := echo.New()
+	e.Validator = &adapter.RequestValidator{Validator: validator.New()}
 
 	userController := adapter.NewUserController(dbClient)
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	e.GET("/user/:id", func(c echo.Context) error { return userController.GetById(c) })
-	e.POST("user/create", func(c echo.Context) error { return userController.Create(c) })
+	e.GET("/users/:id", func(c echo.Context) error { return userController.GetByID(c) })
+	e.POST("users/create", func(c echo.Context) error { return userController.Create(c) })
+	e.POST("users/update_username", func(c echo.Context) error { return userController.UpdateUsername(c) })
 
-	e.Start("0.0.0.0:8080")
+	log.Fatal(e.Start("0.0.0.0:8080"))
 }
