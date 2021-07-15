@@ -11,6 +11,14 @@ services:
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  pgweb:
+    image: sosedoff/pgweb
+    ports:
+      - "8081:8081"
+    environment:
+      DATABASE_URL: "postgres://root:password@db/clean_like?sslmode=disable"
+    depends_on:
+      - db
   backend:
     image: go-clean
     build: ./
