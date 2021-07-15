@@ -1,27 +1,13 @@
 package domain
 
-import (
-	"context"
-	"fmt"
-)
-
 type User struct {
-	ID   int
-	Name string
+	ID       UserID
+	Username Username
 }
 
-func NewUser(name string) (*User, error) {
-	if len(name) < 2 {
-		return nil, fmt.Errorf("ユーザー名は2文字以上です")
-	}
-
+func NewUser(id UserID, username Username) (*User, error) {
 	return &User{
-		ID:   0,
-		Name: name,
+		ID:       id,
+		Username: username,
 	}, nil
-}
-
-type UserRepository interface {
-	GetByID(ctx context.Context, uid int) (user *User, err error)
-	Create(ctx context.Context, newUser *User) (err error)
 }
