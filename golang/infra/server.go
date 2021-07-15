@@ -43,6 +43,7 @@ func Run() {
 
 	e.GET("/users/:id", func(c echo.Context) error { return userController.GetByID(c) })
 	e.POST("users/create", func(c echo.Context) error { return userController.Create(c) })
+	e.POST("users/update_username", func(c echo.Context) error { return userController.UpdateUsername(c) })
 
 	log.Fatal(e.Start("0.0.0.0:8080"))
 }

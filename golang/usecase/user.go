@@ -7,10 +7,9 @@ import (
 )
 
 type UserUsecase interface {
-	// IDに一致するUserを返す。見つからない場合はerrを返す。
 	GetByID(ctx context.Context, id int) (*domain.User, error)
-	// 与えられた名前でUserを作成し、作成されたUserを返す。
 	Create(ctx context.Context, username string) (*domain.User, error)
+	UpdateUsername(ctx context.Context, id int, username string) (*domain.User, error)
 }
 
 type UserInteractor struct {
@@ -43,6 +42,31 @@ func (interactor *UserInteractor) Create(ctx context.Context, username string) (
 	return user, nil
 }
 
+func (interactor *UserInteractor) UpdateUsername(ctx context.Context, id int, username string) (*domain.User, error) {
+	newUsername, err := domain.NewUsername(username)
+	if err != nil {
+		return nil, ErrInvalidUserUpdateRequest(err)
+	}
+
+	user, err := interactor.UserRepository.GetByID(ctx, domain.UserID(id))
+	if err != nil {
+		return nil, err
+	}
+
+	user.Username = newUsername
+
+	updatedUser, err := interactor.UserRepository.Update(ctx, *user)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedUser, nil
+}
+
 func ErrInvalidUserCreateRequest(err error) error {
 	return fmt.Errorf("invalid user create request: %w", err)
+}
+
+func ErrInvalidUserUpdateRequest(err error) error {
+	return fmt.Errorf("invalid user update request: %w", err)
 }

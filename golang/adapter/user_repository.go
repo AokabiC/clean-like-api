@@ -38,3 +38,25 @@ func (repo *UserPgRepository) Create(ctx context.Context, userWithoutID domain.U
 	user.ID = domain.UserID(userRecord.ID)
 	return user, nil
 }
+
+func (repo *UserPgRepository) Update(ctx context.Context, user domain.User) (*domain.User, error) {
+	userRecord, err := repo.client.User.Query().Where(entUser.IDEQ(int(user.ID))).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	updatedUserRecord, err := userRecord.
+		Update().
+		SetUsername(string(user.Username)).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	updatedUser, _ := domain.NewUser(
+		domain.UserID(updatedUserRecord.ID),
+		domain.Username(updatedUserRecord.Username),
+	)
+
+	return updatedUser, nil
+}

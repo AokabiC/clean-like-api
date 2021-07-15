@@ -39,7 +39,7 @@ func (controller *UserController) GetByID(c echo.Context) (err error) {
 	user, err := controller.Interactor.GetByID(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			return echo.NewHTTPError(http.StatusNotFound, "")
+			return echo.NewHTTPError(http.StatusNotFound)
 		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -67,10 +67,10 @@ type (
 func (controller *UserController) Create(c echo.Context) (err error) {
 	request := new(UserCreateRequest)
 	if err := c.Bind(request); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "")
+		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 	if err := c.Validate(request); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "")
+		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 	ctx := context.Background()
 
@@ -86,4 +86,31 @@ func (controller *UserController) Create(c echo.Context) (err error) {
 	}
 	_ = c.JSON(http.StatusCreated, response)
 	return nil
+}
+
+type (
+	// POST users/update_username
+	UserUpdateUsernameRequest struct {
+		ID       int    `json:"id" validate:"required"`
+		Username string `json:"username" validate:"required"`
+	}
+)
+
+func (controller *UserController) UpdateUsername(c echo.Context) (err error) {
+	request := new(UserUpdateUsernameRequest)
+	if err := c.Bind(request); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	if err := c.Validate(request); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	ctx := context.Background()
+
+	_, err = controller.Interactor.UpdateUsername(ctx, request.ID, request.Username)
+	if err != nil {
+		c.Echo().Logger.Error(err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return echo.NewHTTPError(http.StatusOK)
 }
