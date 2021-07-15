@@ -113,9 +113,13 @@ func (controller *UserController) UpdateUsername(c echo.Context) (err error) {
 
 	_, err = controller.Interactor.UpdateUsername(ctx, request.ID, request.Username)
 	if err != nil {
+		if errors.Is(err, domain.ErrUserNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
 		c.Echo().Logger.Error(err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return echo.NewHTTPError(http.StatusOK)
+	_ = c.NoContent(http.StatusOK)
+	return nil
 }
